@@ -33,8 +33,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 		$vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
 		$extra = $event->getComposer()->getPackage()->getExtra();
 		$ignorePaths = isset($extra['cleaner-ignore']) ? $extra['cleaner-ignore'] : (array) $event->getComposer()->getConfig()->get('cleaner-ignore');
+		$removeFiles = isset($extra['cleaner-remove']) ? $extra['cleaner-remove'] : (array) $event->getComposer()->getConfig()->get('cleaner-remove');
 		$fileSystem = new Filesystem(new ProcessExecutor($event->getIO()));
 		$cleaner = new Cleaner($event->getIO(), $fileSystem);
-		$cleaner->clean($vendorDir, $ignorePaths);
+		$cleaner->clean($vendorDir, $ignorePaths, $removeFiles);
 	}
 }

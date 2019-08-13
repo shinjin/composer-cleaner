@@ -42,7 +42,7 @@ class Cleaner
 	/**
 	 * @return void
 	 */
-	public function clean($vendorDir, array $ignorePaths = [])
+	public function clean($vendorDir, array $ignorePaths = [], array $removeFiles = [])
 	{
 		foreach (new FilesystemIterator($vendorDir) as $packageVendor) {
 			if (!$packageVendor->isDir()) {
@@ -58,7 +58,7 @@ class Cleaner
 					$this->io->write("Composer cleaner: Skipped package $name", true, IOInterface::VERBOSE);
 				} else {
 					$this->io->write("Composer cleaner: Package $name", true, IOInterface::VERBOSE);
-					$this->processPackage((string) $packageName, (array) $ignore);
+					$this->processPackage((string) $packageName, (array) $ignore, $removeFiles);
 				}
 			}
 		}
@@ -69,7 +69,7 @@ class Cleaner
 	/**
 	 * @return void
 	 */
-	private function processPackage($packageDir, array $ignoreFiles)
+	private function processPackage($packageDir, array $ignoreFiles, array $removeFiles)
 	{
 		$data = $this->loadComposerJson($packageDir);
 		$type = isset($data->type) ? $data->type : null;
@@ -100,7 +100,8 @@ class Cleaner
 
 		foreach (new FilesystemIterator($packageDir) as $path) {
 			$fileName = $path->getFileName();
-			if (!self::matchMask($fileName, $ignoreFiles)) {
+			if (!self::matchMask($fileName, $ignoreFiles) &&
+				(empty($removeFiles) || self::matchMask($fileName, $removeFiles))) {
 				$this->io->write("Composer cleaner: Removing $path", true, IOInterface::VERBOSE);
 				$this->fileSystem->remove($path);
 				$this->removedCount++;
